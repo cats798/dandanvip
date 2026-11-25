@@ -79,6 +79,13 @@ function patchBody(data, isConfig) {
   }
 }
 
+function notify(title, subtitle, body) {
+  try {
+    if (isQX && typeof $notify !== "undefined") $notify(title, subtitle, body);
+    else if (typeof $notification !== "undefined" && $notification.post) $notification.post(title, subtitle, body);
+  } catch (e) {}
+}
+
 function done(body) {
   $done({ body: typeof body === "string" ? body : JSON.stringify(body) });
 }
@@ -93,6 +100,11 @@ function run() {
   if (!raw) {
     Logger.status("skip", "empty body");
     return done("");
+  }
+
+  // 首次命中时把真实响应外带出来，便于核实字段名
+  if (raw.length < 1500) {
+    notify("蛋蛋抓包", isConfig ? "config" : "profiles", raw.substring(0, 900));
   }
 
   var isConfig = url.indexOf("/config") >= 0;
